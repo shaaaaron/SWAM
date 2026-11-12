@@ -1,0 +1,245 @@
+# Copyright 2026 The RLinf Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import os
+
+# Suppress FFmpeg/libdav1d info banner in video decoder init (goes to stderr, same fd as tqdm).
+# Must run before any torchcodec import; affects all FFmpeg-based libs in-process.
+import av
+av.logging.set_level(av.logging.ERROR)
+from typing import Any
+
+import torch
+from omegaconf import DictConfig
+from torchdata.stateful_dataloader import StatefulDataLoader
+
+from rlinf.config import SupportedModel
+from rlinf.models.embodiment.base_policy import ForwardType
+from rlinf.utils.utils import get_rng_state, set_rng_state
+from rlinf.workers.sft.fsdp_sft_worker import FSDPSftWorker
+
+
+class FSDPVlaSftWorker(FSDPSftWorker):
+    def __init__(self, cfg: DictConfig):
+        super().__init__(cfg)
+
+    def build_dataloader(self, data_paths: list[str], eval_dataset: bool = False):
+        if SupportedModel(self.cfg.actor.model.model_type) in [SupportedModel.OPENPI]:
+            import openpi.training.data_loader as openpi_data_loader
+
+            from rlinf.models.embodiment.openpi.dataconfig import get_openpi_config
+
+            config = get_openpi_config(
+                self.cfg.actor.model.openpi.config_name,
+                model_path=self.cfg.actor.model.model_path,
+                batch_size=self.cfg.actor.micro_batch_size * self._world_size,
+                data_kwargs=getattr(self.cfg.actor, "openpi_data", None),
+            )
+            data_loader = openpi_data_loader.create_data_loader(
+                config, framework="pytorch", shuffle=True
+            )
+            return data_loader, data_loader.data_config()
+        elif SupportedModel(self.cfg.actor.model.model_type) in [
+            SupportedModel.LINGBOTVLA
+        ]:
+            from rlinf.models.embodiment.lingbotvla.sft_builder import (
+                build_lingbot_sft_dataloader,
+            )
+
+            return build_lingbot_sft_dataloader(
+                self.cfg, self._world_size, self._rank, data_paths
+            )
+        elif SupportedModel(self.cfg.actor.model.model_type) in [
+            SupportedModel.DREAMZERO
+        ]:
+            from rlinf.data.datasets.dreamzero import (
+                build_dreamzero_sft_dataloader,
+            )
+
+            return build_dreamzero_sft_dataloader(
+                self.cfg, self._world_size, self._rank, data_paths, eval_dataset
+            )
+        else:
+            raise KeyError(
+                f"not support such model type {self.cfg.actor.model.model_type} for SFT right now."
+            )
+
+    def get_eval_model_output(self, batch: dict[str, Any]):
+        # now the eval is not supported for embodied sft
+        raise NotImplementedError("eval is not supported for embodied sft right now.")
+
+    def get_train_model_output(self, batch: Any) -> tuple[torch.Tensor, dict[str, Any]]:
+        with self.amp_context:
+            output = self.model(forward_type=ForwardType.SFT, data=batch)
+
+        if isinstance(output, torch.Tensor):
+            loss = output
+        else:
+            loss = output["loss"]
+
+        step_metrics = {"loss": loss.detach().item()}
+        if isinstance(output, dict) and output.get("dynamics_loss", None) is not None:
+            step_metrics.update(
+                {
+                    "dynamics_loss": output["dynamics_loss"].detach().item(),
+                    "action_loss": output["action_loss"].detach().item(),
+                }
+            )
+        return loss, step_metrics
+
+    def save_checkpoint(self, save_path: str, step: int = 0) -> None:
+        super().save_checkpoint(save_path, step)
+
+        if isinstance(self.data_loader, StatefulDataLoader):
+            state = self.data_loader.state_dict()
+
+            all_states = [None] * self._world_size
+            torch.distributed.all_gather_object(all_states, state)
+
+            if self._rank == 0:
+                torch.save(all_states, os.path.join(save_path, "data.pt"))
+
+            torch.distributed.barrier()
+
+            progress = {
+                "data_epoch": self._data_epoch,
+                "data_iter_offset": self._data_iter_offset,
+            }
+            all_progress = [None] * self._world_size
+            torch.distributed.all_gather_object(all_progress, progress)
+
+            if self._rank == 0:
+                torch.save(all_progress, os.path.join(save_path, "data_progress.pt"))
+
+            torch.distributed.barrier()
+
+            rng_state = get_rng_state()
+            all_rng_states = [None] * self._world_size
+            torch.distributed.all_gather_object(all_rng_states, rng_state)
+            if self._rank == 0:
+                torch.save(all_rng_states, os.path.join(save_path, "rng.pt"))
+
+            torch.distributed.barrier()
+
+    def load_checkpoint(self, load_path: str) -> None:
+        if isinstance(self.data_loader, StatefulDataLoader):
+            sampler = self.data_loader.sampler
+            parsed_progress = None
+            all_states = None
+            validation_error = None
+            try:
+                if not callable(getattr(sampler, "set_epoch", None)):
+                    raise TypeError(
+                        f"Dataloader sampler {type(sampler).__name__} does not support set_epoch()."
+                    )
+
+                all_progress = torch.load(
+                    os.path.join(load_path, "data_progress.pt"), weights_only=False
+                )
+                if len(all_progress) != self._world_size:
+                    raise ValueError(
+                        "Dataloader progress world size mismatch: "
+                        f"saved={len(all_progress)}, current={self._world_size}."
+                    )
+                parsed_progress = []
+                for rank, progress in enumerate(all_progress):
+                    data_epoch = int(progress["data_epoch"])
+                    data_iter_offset = int(progress["data_iter_offset"])
+                    if data_epoch < 0 or data_iter_offset < 0:
+                        raise ValueError(
+                            "Dataloader progress must be non-negative, got "
+                            f"rank={rank}, epoch={data_epoch}, offset={data_iter_offset}."
+                        )
+                    parsed_progress.append((data_epoch, data_iter_offset))
+
+                all_states = torch.load(
+                    os.path.join(load_path, "data.pt"), weights_only=False
+                )
+                if len(all_states) != self._world_size:
+                    raise ValueError(
+                        "Dataloader state world size mismatch: "
+                        f"saved={len(all_states)}, current={self._world_size}."
+                    )
+            except Exception as exc:
+                validation_error = exc
+
+            # 防止某个进程退出，其他进程忙等
+            dist_ready = (
+                torch.distributed.is_available()
+                and torch.distributed.is_initialized()
+            )
+            if dist_ready:
+                errors = [None] * self._world_size
+                torch.distributed.all_gather_object(
+                    errors,
+                    None
+                    if validation_error is None
+                    else f"{type(validation_error).__name__}: {validation_error}",
+                )
+                if any(error is not None for error in errors):
+                    details = "; ".join(
+                        f"rank={rank}: {error}"
+                        for rank, error in enumerate(errors)
+                        if error is not None
+                    )
+                    raise RuntimeError(
+                        "Dataloader checkpoint validation failed before model load: "
+                        + details
+                    )
+            elif validation_error is not None:
+                raise validation_error
+
+        super().load_checkpoint(load_path)
+
+        if isinstance(self.data_loader, StatefulDataLoader):
+            self._data_epoch, self._data_iter_offset = parsed_progress[self._rank]
+            sampler.set_epoch(self._data_epoch)
+
+            state = all_states[self._rank]
+            # StatefulDataLoader rebuilds and fast-forwards the sampler iterator here.
+            self.data_loader.load_state_dict(state)
+            self.data_iter = iter(self.data_loader)
+
+            rng_path = os.path.join(load_path, "rng.pt")
+            if os.path.exists(rng_path):
+                all_rng_states = torch.load(rng_path, weights_only=False)
+                set_rng_state(all_rng_states[self._rank])
+
+            torch.distributed.barrier()
+
+    def get_max_steps_per_epoch(self):
+        if self.data_loader is None:
+            return 0
+        if SupportedModel(self.cfg.actor.model.model_type) == SupportedModel.OPENPI:
+            num_batches = len(self._openpi_pytorch_dataloader(self.data_loader))
+            return max(1, num_batches // self.gradient_accumulation)
+        return super().get_max_steps_per_epoch()
+
+    @staticmethod
+    def _openpi_pytorch_dataloader(openpi_dataloader: Any):
+        """Unwrap OpenPI `DataLoaderImpl` to the inner PyTorch DataLoader.
+
+        OpenPI torch path:
+          DataLoaderImpl._data_loader -> TorchDataLoader
+          TorchDataLoader._data_loader / .torch_loader -> torch.utils.data.DataLoader
+
+        """
+        torch_data_loader = getattr(openpi_dataloader, "_data_loader", None)
+        pytorch_dl = getattr(torch_data_loader, "_data_loader", None) or getattr(
+            torch_data_loader, "torch_loader", None
+        )
+        if pytorch_dl is None:
+            raise TypeError(
+                "OpenPI dataloader does not expose an inner torch DataLoader; cannot infer steps per epoch from len()."
+            )
+        return pytorch_dl

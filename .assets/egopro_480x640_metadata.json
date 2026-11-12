@@ -1,0 +1,15 @@
+{
+  "egopro": {
+    "statistics": {"state": {}, "action": {}},
+    "modalities": {
+      "video": {
+        "head_left": {"resolution": [640, 480], "channels": 3, "fps": 30.0},
+        "left_wrist": {"resolution": [640, 480], "channels": 3, "fps": 30.0},
+        "right_wrist": {"resolution": [640, 480], "channels": 3, "fps": 30.0}
+      },
+      "state": {},
+      "action": {}
+    },
+    "embodiment_tag": "egopro"
+  }
+}

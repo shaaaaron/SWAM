@@ -1,0 +1,118 @@
+# @package _global_
+# DROID video-only side dataset for CoTrainTrainer.
+#
+# This config intentionally uses local video_* names so it does not override
+# the labeled DROID modality/transform config from data=dreamzero/droid_relative_wan22.
+
+droid_data_root: ???
+
+video_modality_config_oxe_droid:
+  video:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+    eval_delta_indices: [0]
+    modality_keys:
+      - video.exterior_image_1_left
+      - video.exterior_image_2_left
+      - video.wrist_image_left
+  state:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0]
+    modality_keys:
+      - state.joint_position
+      - state.gripper_position
+  action:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: []
+    modality_keys: []
+  language:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0]
+    modality_keys:
+      - annotation.language.language_instruction
+      - annotation.language.language_instruction_2
+      - annotation.language.language_instruction_3
+  lapa_action:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0]
+    modality_keys:
+      - lapa_action
+
+video_model_specific_transform:
+  _target_: groot.vla.model.dreamzero.transform.dreamzero_cotrain.DreamTransform
+  default_instruction: "Perform the default behavior."
+  language_dropout_prob: ${language_dropout_prob}
+  always_use_default_instruction: false
+  max_state_dim: ${max_state_dim}
+  max_action_dim: ${max_action_dim}
+  max_length: ${max_length}
+  state_horizon: ${state_horizon}
+  action_horizon: 0
+  embodiment_tag_mapping: ${embodiment_tag_to_projector_index}
+  tokenizer_path: ${tokenizer_path}
+
+video_transform_oxe_droid:
+  _target_: groot.vla.data.transform.ComposedModalityTransform
+  transforms:
+    - _target_: groot.vla.data.transform.VideoToTensor
+      apply_to: ${video_modality_config_oxe_droid.video.modality_keys}
+    - _target_: groot.vla.data.transform.VideoCrop
+      apply_to: ${video_modality_config_oxe_droid.video.modality_keys}
+      scale: 0.95
+      mode: random
+    - _target_: groot.vla.data.transform.VideoResize
+      apply_to: ${video_modality_config_oxe_droid.video.modality_keys}
+      height: ${image_resolution_height}
+      width: ${image_resolution_width}
+      interpolation: linear
+    - _target_: groot.vla.data.transform.VideoColorJitter
+      apply_to: ${video_modality_config_oxe_droid.video.modality_keys}
+      brightness: 0.3
+      contrast: 0.4
+      saturation: 0.5
+      hue: 0.08
+    - _target_: groot.vla.data.transform.VideoToNumpy
+      apply_to: ${video_modality_config_oxe_droid.video.modality_keys}
+
+    - _target_: groot.vla.data.transform.StateActionToTensor
+      apply_to: ${video_modality_config_oxe_droid.state.modality_keys}
+    - _target_: groot.vla.data.transform.StateActionTransform
+      apply_to: ${video_modality_config_oxe_droid.state.modality_keys}
+      normalization_modes:
+        state.joint_position: q99
+        state.gripper_position: q99
+
+    - _target_: groot.vla.data.transform.ConcatTransform
+      video_concat_order: ${video_modality_config_oxe_droid.video.modality_keys}
+      state_concat_order: ${video_modality_config_oxe_droid.state.modality_keys}
+      action_concat_order: ${video_modality_config_oxe_droid.action.modality_keys}
+
+    - ${video_model_specific_transform}
+
+video_dataset:
+  _target_: ${mixture_dataset_cls}
+  _convert_: object
+  mixture_spec:
+    - dataset_path:
+        oxe_droid:
+          - ${droid_data_root}
+      dataset_weight: 1.0
+      distribute_weights: true
+  dataset_class: ${single_dataset_cls}
+  all_modality_configs:
+    oxe_droid: ${video_modality_config_oxe_droid}
+  all_transforms:
+    oxe_droid: ${video_transform_oxe_droid}
+  metadata_versions: ${metadata_versions}
+  fps: ${fps}
+  dataset_kwargs:
+    video_backend: decord
+    use_global_metadata: false
+    max_chunk_size: ${max_chunk_size}
+    relative_action: false
+    relative_action_keys: []
+  mixture_kwargs:
+    training: true
+    balance_dataset_weights: false
+    seed: 4242
+    shard_sampling_rate: ${dataset_shard_sampling_rate}

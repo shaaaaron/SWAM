@@ -1,0 +1,176 @@
+# @package _global_
+# RobotWin video-only config for Wan2.2. The action modality is intentionally
+# empty, so DreamTransform emits an empty action tensor and the action head
+# skips action loss.
+
+defaults:
+  - dreamzero/base_48_wan_fine_aug_relative
+  - _self_
+
+image_resolution_width: 320
+image_resolution_height: 160
+
+max_state_dim: 64
+use_global_metadata: false
+relative_action: false
+relative_action_keys: []
+action_horizon: 0
+max_chunk_size: 4
+dataset_shard_sampling_rate: 0.3
+mixture_dataset_cls: groot.vla.data.dataset.lerobot_sharded.ShardedLeRobotMixtureDataset.from_mixture_spec
+single_dataset_cls: groot.vla.data.dataset.lerobot_sharded.ShardedLeRobotSubLangSingleActionChunkDatasetRoboTwin
+
+robotwin_data_root: ???
+robotwin_bad_video_manifest: null
+
+modality_config_robotwin:
+  video:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+    eval_delta_indices: [0]
+    modality_keys:
+      - video.cam_high
+      - video.cam_left_wrist
+      - video.cam_right_wrist
+  state:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0]
+    modality_keys:
+      - state.eef_position
+  action:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: []
+    modality_keys: []
+  language:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0]
+    modality_keys:
+      - annotation.language.action_text
+
+transform_robotwin:
+  _target_: groot.vla.data.transform.ComposedModalityTransform
+  transforms:
+    - _target_: groot.vla.data.transform.VideoToTensor
+      apply_to: ${modality_config_robotwin.video.modality_keys}
+    - _target_: groot.vla.data.transform.VideoCrop
+      apply_to: ${modality_config_robotwin.video.modality_keys}
+      scale: 0.95
+      mode: random
+    - _target_: groot.vla.data.transform.VideoResize
+      apply_to: ${modality_config_robotwin.video.modality_keys}
+      height: ${image_resolution_height}
+      width: ${image_resolution_width}
+      interpolation: linear
+    - _target_: groot.vla.data.transform.VideoColorJitter
+      apply_to: ${modality_config_robotwin.video.modality_keys}
+      brightness: 0.3
+      contrast: 0.4
+      saturation: 0.5
+      hue: 0.08
+    - _target_: groot.vla.data.transform.VideoToNumpy
+      apply_to: ${modality_config_robotwin.video.modality_keys}
+
+    - _target_: groot.vla.data.transform.StateActionToTensor
+      apply_to: ${modality_config_robotwin.state.modality_keys}
+    - _target_: groot.vla.data.transform.StateActionTransform
+      apply_to: ${modality_config_robotwin.state.modality_keys}
+      normalization_modes:
+        state.eef_position: q99
+
+    - _target_: groot.vla.data.transform.ConcatTransform
+      video_concat_order: ${modality_config_robotwin.video.modality_keys}
+      state_concat_order: ${modality_config_robotwin.state.modality_keys}
+      action_concat_order: ${modality_config_robotwin.action.modality_keys}
+
+    - ${model_specific_transform}
+
+modality_configs:
+  robotwin: ${modality_config_robotwin}
+
+transforms:
+  robotwin: ${transform_robotwin}
+
+metadata_versions:
+  robotwin: '0221'
+
+fps:
+  robotwin: 15
+
+train_dataset:
+  _target_: ${mixture_dataset_cls}
+  _convert_: object
+  mixture_spec:
+    - dataset_path:
+        robotwin:
+          - ${robotwin_data_root}/adjust_bottle-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/beat_block_hammer-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/blocks_ranking_rgb-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/blocks_ranking_size
+          - ${robotwin_data_root}/click_alarmclock-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/click_bell-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/dump_bin_bigbin-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/grab_roller-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/handover_block-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/handover_mic-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/hanging_mug-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/lift_pot-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/move_can_pot-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/move_pillbottle_pad-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/move_playingcard_away-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/move_stapler_pad-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/open_laptop-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/open_microwave-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/pick_diverse_bottles-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/pick_dual_bottles-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_a2b_left-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_a2b_right-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_bread_basket-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_bread_skillet-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_burger_fries-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_can_basket-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_cans_plasticbox-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_container_plate-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_dual_shoes-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_empty_cup-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_fan-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_mouse_pad-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_object_basket-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_object_scale-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_object_stand-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_phone_stand-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/place_shoe-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/press_stapler-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/put_bottles_dustbin-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/put_object_cabinet
+          - ${robotwin_data_root}/rotate_qrcode-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/scan_object
+          - ${robotwin_data_root}/shake_bottle-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/shake_bottle_horizontally-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/stack_blocks_three-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/stack_blocks_two-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/stack_bowls_three-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/stack_bowls_two-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/stamp_seal-aloha-agilex_randomized_500-1000
+          - ${robotwin_data_root}/turn_switch-aloha-agilex_randomized_500-1000
+      dataset_weight: 1.0
+      distribute_weights: true
+
+  dataset_class: ${single_dataset_cls}
+  all_modality_configs: ${modality_configs}
+  all_transforms: ${transforms}
+  metadata_versions: ${metadata_versions}
+  fps: ${fps}
+  dataset_kwargs:
+    video_backend: decord
+    # video_backend_kwargs:
+    #   num_threads: 4
+    use_global_metadata: ${use_global_metadata}
+    max_chunk_size: ${max_chunk_size}
+    relative_action: ${relative_action}
+    relative_action_keys: ${relative_action_keys}
+    discarded_episode_manifest: ${robotwin_bad_video_manifest}
+  mixture_kwargs:
+    training: true
+    balance_dataset_weights: false
+    seed: 42
+    shard_sampling_rate: ${dataset_shard_sampling_rate}

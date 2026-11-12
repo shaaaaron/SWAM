@@ -1,0 +1,275 @@
+defaults:
+  - training_backend/fsdp@actor.fsdp_config
+  - model/dreamzero_5b_wo_img@actor.model
+  - override hydra/job_logging: stdout
+
+hydra:
+  run:
+    dir: .
+  output_subdir: null
+  searchpath:
+    - file://robotwin/config/
+
+cluster:
+  num_nodes: 1
+  component_placement:
+    actor: all
+
+runner:
+  task_type: sft
+  logger:
+    log_path: ../ckpts-rlinf
+    project_name: dreamzero_robotwin_wan2_2
+    experiment_name: dreamzero_noe_robotics
+    logger_backends: ["tensorboard"]
+
+  max_epochs: -1
+  max_steps: 20000
+  val_check_interval: -1
+  save_interval: 5000
+  save_start_step: 19000
+  log_interval: 10
+  resume_dir: null
+
+data:
+  # Compatibility path for the legacy SFT entrypoint and HF_LEROBOT_HOME.
+  # Mixed sampling uses the 9 explicit dataset entries below.
+  # Weights are proportional to each subset's usable duration (total: 1339.06 h).
+  train_data_paths: ../data/noe_data_robotics
+
+  train_datasets:
+    - name: agibot_world_alpha
+      weight: 0.3932  # 526.46 / 1339.06 = 0.393160, rounded to 0.3932
+      data_paths: ../data/noe_data_robotics/agibot_world-alpha
+      metadata_json_path: .assets/agibot_world_alpha_metadata.json
+      embodiment_tag: noe_robotics_16d
+      metadata_embodiment_tag: noe_robotics_16d
+      tasks_filename: tasks_v1.jsonl
+      has_real_action: true
+      relative_action: false
+      relative_action_mode: ""
+      relative_action_keys: []
+      image_resolution_width: 160
+      image_resolution_height: 128
+
+    - name: robocoin_cobot_magic_640x480
+      weight: 0.1861  # 249.14 / 1339.06 = 0.186054, rounded to 0.1861
+      data_paths: ../data/noe_data_robotics/robocoin/cobot_magic__3cam_front_640x480_wrist1_640x480_wrist2_640x480
+      metadata_json_path: .assets/robocoin_cobot_magic_640x480_metadata.json
+      embodiment_tag: noe_robotics_16d
+      metadata_embodiment_tag: noe_robotics_16d
+      tasks_filename: tasks_v1.jsonl
+      has_real_action: true
+      relative_action: false
+      relative_action_mode: ""
+      relative_action_keys: []
+      image_resolution_width: 160
+      image_resolution_height: 128
+
+    - name: robocoin_cobot_magic_1280x720
+      weight: 0.0332  # 44.51 / 1339.06 = 0.033238, rounded to 0.0332
+      data_paths: ../data/noe_data_robotics/robocoin/cobot_magic__3cam_front_1280x720_wrist1_1280x720_wrist2_1280x720
+      metadata_json_path: .assets/robocoin_cobot_magic_1280x720_metadata.json
+      embodiment_tag: noe_robotics_16d
+      metadata_embodiment_tag: noe_robotics_16d
+      tasks_filename: tasks_v1.jsonl
+      has_real_action: true
+      relative_action: false
+      relative_action_mode: ""
+      relative_action_keys: []
+      image_resolution_width: 160
+      image_resolution_height: 128
+
+    - name: robocoin_galaxea_r1_lite_1280x720
+      weight: 0.0579  # 77.52 / 1339.06 = 0.057892, rounded to 0.0579
+      data_paths: ../data/noe_data_robotics/robocoin/galaxea_r1_lite__3cam_front_1280x720_wrist1_1280x720_wrist2_1280x720
+      metadata_json_path: .assets/robocoin_galaxea_r1_lite_1280x720_metadata.json
+      embodiment_tag: noe_robotics_16d
+      metadata_embodiment_tag: noe_robotics_16d
+      tasks_filename: tasks_v1.jsonl
+      has_real_action: true
+      relative_action: false
+      relative_action_mode: ""
+      relative_action_keys: []
+      image_resolution_width: 160
+      image_resolution_height: 128
+
+    - name: robocoin_galbot_g1_mixed
+      weight: 0.0358  # 47.93 / 1339.06 = 0.035790, rounded to 0.0358
+      data_paths: ../data/noe_data_robotics/robocoin/galbot_g1__3cam_front_640x480_wrist1_640x368_wrist2_640x368
+      metadata_json_path: .assets/robocoin_galbot_g1_mixed_metadata.json
+      embodiment_tag: noe_robotics_16d
+      metadata_embodiment_tag: noe_robotics_16d
+      tasks_filename: tasks_v1.jsonl
+      has_real_action: true
+      relative_action: false
+      relative_action_mode: ""
+      relative_action_keys: []
+      image_resolution_width: 160
+      image_resolution_height: 128
+
+    - name: robomind_v1_agilex_640x480
+      weight: 0.0353  # 47.24 / 1339.06 = 0.035280, rounded to 0.0353
+      data_paths: ../data/noe_data_robotics/robomind_v1/group_03_image_640x480_wrist1_640x480_wrist2_640x480_agilex
+      metadata_json_path: .assets/robomind_v1_agilex_640x480_metadata.json
+      embodiment_tag: noe_robotics_16d
+      metadata_embodiment_tag: noe_robotics_16d
+      tasks_filename: tasks_v1.jsonl
+      has_real_action: true
+      relative_action: false
+      relative_action_mode: ""
+      relative_action_keys: []
+      image_resolution_width: 160
+      image_resolution_height: 128
+
+    - name: robomind_v2_ark_640x480
+      weight: 0.1377  # 184.45 / 1339.06 = 0.137745, rounded to 0.1377
+      data_paths: ../data/noe_data_robotics/robomind_v2-part1/group_04_image_640x480_wrist1_640x480_wrist2_640x480_ark
+      metadata_json_path: .assets/robomind_v2_ark_640x480_cleaned_full_metadata.json
+      embodiment_tag: noe_robotics_16d
+      metadata_embodiment_tag: noe_robotics_16d
+      tasks_filename: tasks_v1.jsonl
+      has_real_action: false  # 动作存在问题，不使用
+      relative_action: false
+      relative_action_mode: ""
+      relative_action_keys: []
+      image_resolution_width: 160
+      image_resolution_height: 128
+
+    - name: robomind_v2_agilex_640x480
+      weight: 0.0686  # 91.88 / 1339.06 = 0.068612, rounded to 0.0686
+      data_paths: ../data/noe_data_robotics/robomind_v2-part2/group_02_agilex_image_640x480_wrist1_640x480_wrist2_640x480_rgb_cleaned_h264
+      metadata_json_path: .assets/robomind_v2_agilex_640x480_cleaned_full_metadata.json
+      embodiment_tag: noe_robotics_16d
+      metadata_embodiment_tag: noe_robotics_16d
+      tasks_filename: tasks_v1.jsonl
+      has_real_action: false  # 动作存在问题，不使用
+      relative_action: false
+      relative_action_mode: ""
+      relative_action_keys: []
+      image_resolution_width: 160
+      image_resolution_height: 128
+
+    - name: robomind_v2_franka_main_1280x720
+      weight: 0.0522  # 69.94 / 1339.06 = 0.052228, rounded to 0.0522
+      data_paths: ../data/noe_data_robotics/robomind_v2-part2/group_06_franka_image_1280x720_wrist1_640x480_wrist2_640x480
+      metadata_json_path: .assets/robomind_v2_franka_main_1280x720_metadata.json
+      embodiment_tag: noe_robotics_16d
+      metadata_embodiment_tag: noe_robotics_16d
+      tasks_filename: tasks_v1.jsonl
+      has_real_action: true
+      relative_action: false
+      relative_action_mode: ""
+      relative_action_keys: []
+      image_resolution_width: 160
+      image_resolution_height: 128
+
+
+  mixture:
+    epoch_size: 200000
+    seed: 42
+
+  lazy_load: true
+  num_workers: 8
+  prefetch_factor: 8
+  video_tolerance_s: 0.1
+  parquet_cache_size: 512
+  sampling_mode: multi_anchor
+  multi_anchor_macro_stride: 48
+  multi_anchor_video_offsets: [0, 6, 12, 18, 24, 30, 36, 42]
+  video_backend: torchcodec
+  return_episode_first_images: true
+  dataloader_profile: true
+  dataloader_profile_first_n: 4
+  dataloader_profile_slow_s: 2.0
+
+actor:
+  group_name: "ActorGroup"
+  training_backend: "fsdp"
+  micro_batch_size: 16
+  global_batch_size: 256
+  seed: 42
+  enable_offload: false
+
+  model:
+    model_type: "dreamzero"
+    precision: fp32
+    model_path: null
+    tokenizer_path: null  # 被 train_dreamzero.sh 的 DREAMZERO_UMT5_PATH 覆盖
+    diffusion_model_pretrained_path: null  # 被 train_dreamzero.sh 的 DREAMZERO_WAN22_PATH 覆盖
+    image_encoder_pretrained_path: null  # 被 train_dreamzero.sh 的 DREAMZERO_WAN21_IMAGE_ENCODER_PATH 覆盖
+    text_encoder_pretrained_path: null  # 被 train_dreamzero.sh 的 DREAMZERO_WAN22_PATH 覆盖
+    vae_pretrained_path: null  # 被 train_dreamzero.sh 的 DREAMZERO_WAN22_PATH 覆盖
+    metadata_json_path: .assets/agibot_world_alpha_metadata.json
+
+    action_horizon: 48
+    state_horizon: 1
+    num_action_per_block: 48
+    action_dim: 16
+    max_action_dim: 16
+    max_state_dim: 16
+    image_resolution_width: 160
+    image_resolution_height: 128
+    target_video_width: 320
+    target_video_height: 256
+
+    action_head_cfg:
+      config:
+        action_dim: 16
+        max_action_dim: 16
+        max_state_dim: 16
+        diffusion_model_cfg:
+          action_dim: 16
+          max_state_dim: 16
+          frame_seqlen: 80
+          enable_missing_action_embedding: true
+        train_architecture: full
+        video_condition_on_action_state: false
+        use_past_action_context: false
+        use_episode_first_frame_token: true
+        episode_first_frame_rope_index: 1000
+    is_lora: false
+
+    embodiment_tag: noe_robotics_16d
+    metadata_embodiment_tag: noe_robotics_16d
+    embodiment_tag_mapping:
+      noe_robotics_16d: 39
+    relative_action: false
+    relative_action_mode: null
+    relative_action_keys: []
+    relative_action_per_horizon: false
+    load_to_device: false
+
+  optim:
+    lr: 4.0e-5
+    value_lr: 1.55e-4
+    adam_beta1: 0.95
+    adam_beta2: 0.999
+    adam_eps: 1.0e-8
+    weight_decay: 1.0e-5
+    clip_grad: 1.0
+    lr_scheduler: "constant"
+    lr_warmup_steps: -1
+    lr_warmup_steps_ratio: 0.05
+    total_training_steps: ${runner.max_steps}
+
+  fsdp_config:
+    strategy: "fsdp2"
+    sharding_strategy: "full_shard"
+    use_orig_params: true
+    gradient_checkpointing: true
+    gradient_checkpointing_use_reentrant: true
+    limit_all_gathers: true
+    forward_prefetch: true
+    backward_prefetch: "pre"
+    reshard_after_forward: true
+    save_full_model_weights: false
+    grad_scaler:
+      enabled: false
+    mixed_precision:
+      param_dtype: bf16
+      reduce_dtype: bf16
+      buffer_dtype: bf16
+    amp_autocast:
+      enabled: false
+      precision: "bf16"

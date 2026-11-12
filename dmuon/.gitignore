@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.so
+
+# Tools
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude Code local config
+.claude/
+
+# Environment
+.env
+*.env
+
+# PyTorch / CUDA
+*.pt
+*.pth
+*.bin
+
+# Profiling traces
+*.json.gz
+profile_traces/
+benchmarks/profiles/
+
+# CuteDSL kernel cache
+dmuon_kernel_cache/
+
+# Internal docs — never in public repo
+docs/internal/
+
+# OS
+.DS_Store
+Thumbs.db
+site/
+
+# Precision experiment artifacts (generated on demand)
+tests/precision/artifacts/
+
+# torch.profiler trace artifacts — regenerate, don't commit
+tests/distributed/*.pt.trace.json
+
+# 256GPU experiment pipeline code — keep local only for now
+/benchmarks/experiment_256gpu/
+/tests/experiment_256gpu/
+/benchmarks/__init__.py
+
+# Local/remote experiment run outputs
+/.experiment_*/
+/.remote_gpu_runs/
+/.profiles/
+/.tmp_*/
+/.pytest_artifacts/

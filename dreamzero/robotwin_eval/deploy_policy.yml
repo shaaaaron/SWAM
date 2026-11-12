@@ -1,0 +1,33 @@
+policy_name: dreamzero2robotwin_interface
+task_name: null
+task_config: null
+ckpt_setting: null
+seed: null
+instruction_type: unseen
+
+# DreamZero Client Parameters
+host: "127.0.0.1"
+port: 8000
+# RoboTwin2 native joint action: 14D = [L_arm(6)+L_grip(1)+R_arm(6)+R_grip(1)].
+action_dim: 14
+action_chunk_size: 48
+# Client-side resize target. Must match the RoboTwin2 TRAINING resolution,
+# because the model's eval transform pipeline has NO VideoResize step and
+# VideoToTensor asserts the input already equals training resolution.
+# Training data was pre-resized to 128x160.
+image_height: 128
+image_width: 160
+
+# Action type for RoboTwin: "qpos" (joint position) or "ee" (end-effector pose).
+# "qpos" mode: model outputs 14D [L_arm(6)+L_grip(1)+R_arm(6)+R_grip(1)],
+#   matching RoboTwin's take_action(action, action_type='qpos') format directly.
+#   This is the native mode for RoboTwin2 training.
+action_type: "qpos"
+
+# Server-side parameters (loaded by dreamzero_robotwin_server.py via --config)
+# Input state dimensions expected by the checkpoint's normalizer (RoboTwin2: 14D total).
+# state = [L_arm(6)+L_grip(1)+R_arm(6)+R_grip(1)]. No separate gripper concat needed.
+state_joint_dim: 14
+state_gripper_dim: 0
+# Embodiment tag for loading transforms/metadata (must match training metadata.json key).
+embodiment_tag: "robotwin2"

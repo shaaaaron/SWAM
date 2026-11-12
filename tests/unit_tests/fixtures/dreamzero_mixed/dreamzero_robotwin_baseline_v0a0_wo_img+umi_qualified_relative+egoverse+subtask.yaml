@@ -1,0 +1,192 @@
+defaults:
+  - training_backend/fsdp@actor.fsdp_config
+  - model/dreamzero_5b_wo_img@actor.model
+  - override hydra/job_logging: stdout
+
+hydra:
+  run:
+    dir: .
+  output_subdir: null
+  searchpath:
+    - file://robotwin/config/
+
+cluster:
+  num_nodes: 1
+  component_placement:
+    actor: all
+
+runner:
+  task_type: sft
+  logger:
+    log_path: ${oc.env:LOG_ROOT,./logs}
+    project_name: dreamzero_robotwin_wan2_2
+    experiment_name: dreamzero_robotwin_baseline_v0a0_wo_img_umi_qualified_relative_egoverse_subtask_mix_rlinf
+    logger_backends: ["tensorboard"]
+
+  max_epochs: -1
+  max_steps: 20000
+  val_check_interval: -1
+  save_interval: 5000
+  save_start_step: 11000
+  log_interval: 10
+  resume_dir: null
+
+data:
+  # Compatibility path for the legacy SFT entrypoint and HF_LEROBOT_HOME.
+  # Actual mixed sampling uses the per-dataset entries below.
+  train_data_paths: ${oc.env:RLINF_DATA_ROOT}/noe_data_mini
+
+  train_datasets:
+    - name: noe_umi
+      weight: 1.0
+      data_paths: ${oc.env:RLINF_DATA_ROOT}/noe_data_mini
+      metadata_json_path: .assets/noe_umi_16d_relative_metadata_full.json
+      embodiment_tag: noe_umi_16d
+      metadata_embodiment_tag: noe_umi_16d
+      episode_instruction_key: task_annotation
+      filter_noe_umi_qualified_episodes: true
+      relative_action: true
+      relative_action_mode: noe_umi_eef_se3_s0_wxyz
+      relative_action_keys: ["eef_position"]
+
+    # The two EgoVerse roots share a total weight of 1.0, so UMI:EgoVerse = 1:1.
+    - name: egoverse_368x640
+      weight: 0.5
+      data_paths: ${oc.env:RLINF_DATA_ROOT}/egoverse_lerobot_v21/egoverse_368x640
+      metadata_json_path: .assets/egoverse_368x640_metadata.json
+      embodiment_tag: egoverse
+      metadata_embodiment_tag: egoverse
+      use_subtask_instruction: true
+      use_scene_instruction: false
+      has_real_action: false
+      ego_view_layout: single
+      image_resolution_width: 320
+      image_resolution_height: 256
+      relative_action: false
+      relative_action_mode: ""
+      relative_action_keys: []
+
+    - name: egoverse_480x640
+      weight: 0.5
+      data_paths: ${oc.env:RLINF_DATA_ROOT}/egoverse_lerobot_v21/egoverse_480x640
+      metadata_json_path: .assets/egoverse_480x640_metadata.json
+      embodiment_tag: egoverse
+      metadata_embodiment_tag: egoverse
+      use_subtask_instruction: true
+      use_scene_instruction: false
+      has_real_action: false
+      ego_view_layout: single
+      image_resolution_width: 320
+      image_resolution_height: 256
+      relative_action: false
+      relative_action_mode: ""
+      relative_action_keys: []
+
+  mixture:
+    epoch_size: 200000
+    seed: 42
+
+  lazy_load: true
+  num_workers: 8
+  prefetch_factor: 8
+  video_tolerance_s: 0.1
+  parquet_cache_size: 512
+  sampling_mode: multi_anchor
+  multi_anchor_macro_stride: 48
+  multi_anchor_video_offsets: [0, 6, 12, 18, 24, 30, 36, 42]
+  dataloader_profile: true
+  dataloader_profile_first_n: 4
+  dataloader_profile_slow_s: 2.0
+  video_backend: torchcodec
+
+actor:
+  group_name: "ActorGroup"
+  training_backend: "fsdp"
+  micro_batch_size: 16
+  global_batch_size: 128
+  seed: 42
+  enable_offload: false
+
+  model:
+    model_type: "dreamzero"
+    precision: fp32
+    model_path: null
+    tokenizer_path: ${oc.env:DREAMZERO_UMT5_PATH}
+    diffusion_model_pretrained_path: ${oc.env:DREAMZERO_WAN22_PATH}
+    image_encoder_pretrained_path: ${oc.env:DREAMZERO_WAN21_IMAGE_ENCODER_PATH}
+    text_encoder_pretrained_path: ${oc.env:DREAMZERO_WAN22_PATH}/models_t5_umt5-xxl-enc-bf16.pth
+    vae_pretrained_path: ${oc.env:DREAMZERO_WAN22_PATH}/Wan2.2_VAE.pth
+
+    # Root model config is reserved for RoboTwin checkpoint/export semantics.
+    # Per-dataset entries above define the actual mixed training transforms.
+    metadata_json_path: .assets/robotwin_metadata.json
+    embodiment_tag: "robotwin"
+    metadata_embodiment_tag: "robotwin"
+    embodiment_tag_mapping:
+      robotwin: 33
+      noe_umi_16d: 34
+      egoverse: 36
+    relative_action: false
+    relative_action_mode: null
+    relative_action_keys: []
+    relative_action_per_horizon: false
+
+    action_horizon: 48
+    state_horizon: 1
+    num_action_per_block: 48
+    action_dim: 16
+    max_action_dim: 16
+    max_state_dim: 16
+    image_resolution_width: 160
+    image_resolution_height: 128
+    target_video_height: 256
+    target_video_width: 320
+
+    action_head_cfg:
+      config:
+        action_dim: 16
+        max_action_dim: 16
+        max_state_dim: 16
+        diffusion_model_cfg:
+          action_dim: 16
+          max_state_dim: 16
+          frame_seqlen: 80
+        train_architecture: full
+        video_condition_on_action_state: false
+        use_past_action_context: false
+    is_lora: false
+    load_to_device: false
+
+  optim:
+    lr: 4.0e-5
+    value_lr: 1.55e-4
+    adam_beta1: 0.95
+    adam_beta2: 0.999
+    adam_eps: 1.0e-08
+    weight_decay: 1.0e-5
+    clip_grad: 1.0
+    lr_scheduler: "constant"
+    lr_warmup_steps: -1
+    lr_warmup_steps_ratio: 0.05
+    total_training_steps: ${runner.max_steps}
+
+  fsdp_config:
+    strategy: "fsdp2"
+    sharding_strategy: "full_shard"
+    use_orig_params: true
+    gradient_checkpointing: true
+    gradient_checkpointing_use_reentrant: true
+    limit_all_gathers: true
+    forward_prefetch: true
+    backward_prefetch: "pre"
+    reshard_after_forward: true
+    save_full_model_weights: false
+    grad_scaler:
+      enabled: false
+    mixed_precision:
+      param_dtype: bf16
+      reduce_dtype: bf16
+      buffer_dtype: bf16
+    amp_autocast:
+      enabled: false
+      precision: "bf16"

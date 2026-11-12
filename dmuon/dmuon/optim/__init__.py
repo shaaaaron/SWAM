@@ -1,0 +1,34 @@
+"""DMuon optimizer package."""
+
+from ..grad_clip import (
+    MuonGradClipStats,
+    clip_grad_norm_,
+    register_muon_grad_clip_strategy,
+)
+from .muon import Muon
+from .newton_schulz import (
+    POLAR_EXPRESS_COEFFICIENTS,
+    YOU_COEFFICIENTS,
+    NewtonSchulz,
+    direct_newton_schulz,
+    gram_newton_schulz,
+    gram_newton_schulz_local,  # back-compat alias for gram_newton_schulz
+    newton_schulz,
+)
+from .syrk_dispatch import get_backend_status, get_ns_backend
+
+__all__ = [
+    "Muon",
+    "clip_grad_norm_",
+    "register_muon_grad_clip_strategy",
+    "MuonGradClipStats",
+    "NewtonSchulz",
+    "newton_schulz",
+    "direct_newton_schulz",
+    "gram_newton_schulz",
+    "gram_newton_schulz_local",
+    "get_ns_backend",
+    "get_backend_status",
+    "YOU_COEFFICIENTS",
+    "POLAR_EXPRESS_COEFFICIENTS",
+]

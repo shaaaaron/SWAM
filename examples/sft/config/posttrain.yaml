@@ -1,0 +1,150 @@
+defaults:
+  - training_backend/fsdp@actor.fsdp_config
+  - model/dreamzero_5b_wo_img@actor.model
+  - override hydra/job_logging: stdout
+
+hydra:
+  run:
+    dir: .
+  output_subdir: null
+  searchpath:
+    - file://robotwin/config/
+
+cluster:
+  num_nodes: 1
+  component_placement:
+    actor: all
+
+runner:
+  task_type: sft
+  logger:
+    log_path: null  # 被 train_dreamzero.sh 的 LOG_ROOT 覆盖
+    project_name: dreamzero_robotwin_wan2_2
+    experiment_name: posttrain
+    logger_backends: ["tensorboard"]
+
+  max_epochs: -1
+  max_steps: 20000
+  val_check_interval: -1
+  save_interval: 5000
+  save_start_step: 19000
+  log_interval: 10
+  resume_dir: null
+
+data:
+  train_data_paths: ../data/robotwin-clean-and-aug-lerobot/lerobot_robotwin_eef_clean_50
+  tasks_filename: tasks_v1.jsonl
+  episode_exclusion_manifest: meta/episode_exclusions_20261023.jsonl
+
+  lazy_load: True
+  num_workers: 8
+  prefetch_factor: 8
+  video_tolerance_s: 0.1
+  parquet_cache_size: 512
+  sampling_mode: multi_anchor
+  multi_anchor_macro_stride: 48
+  multi_anchor_video_offsets: [0, 6, 12, 18, 24, 30, 36, 42]
+  dataloader_profile: True
+  dataloader_profile_first_n: 4
+  dataloader_profile_slow_s: 2.0
+  video_backend: torchcodec
+  return_episode_first_images: False
+
+actor:
+  group_name: "ActorGroup"
+  training_backend: "fsdp"
+  micro_batch_size: 16
+  global_batch_size: 128
+  seed: 42
+  enable_offload: False
+
+  model:
+    model_type: "dreamzero"
+    precision: fp32
+    # 由 pipeline 注入同结构 pretrain 的转换权重；不恢复 optimizer 或 step。
+    model_path: null
+    checkpoint_config_mode: yaml_only
+    tokenizer_path: null  # 被 train_dreamzero.sh 的 DREAMZERO_UMT5_PATH 覆盖
+    diffusion_model_pretrained_path: null  # 被 train_dreamzero.sh 的 DREAMZERO_WAN22_PATH 覆盖
+    image_encoder_pretrained_path: null  # 被 train_dreamzero.sh 的 DREAMZERO_WAN21_IMAGE_ENCODER_PATH 覆盖
+    text_encoder_pretrained_path: null  # 被 train_dreamzero.sh 的 DREAMZERO_WAN22_PATH 覆盖
+    vae_pretrained_path: null  # 被 train_dreamzero.sh 的 DREAMZERO_WAN22_PATH 覆盖
+    # 此 metadata 按 action_horizon=48 生成；修改 action_horizon 时必须重新生成。
+    metadata_json_path: .assets/robotwin_metadata_temporal_continuous.json
+
+    action_horizon: 48
+    state_horizon: 1
+    num_action_per_block: 48
+    action_dim: 16
+    max_action_dim: 16
+    max_state_dim: 16
+    image_resolution_width: 160
+    image_resolution_height: 128
+    target_video_height: 256
+    target_video_width: 320
+    has_real_action: true
+
+    action_head_cfg:
+      config:
+        action_dim: 16
+        max_action_dim: 16
+        max_state_dim: 16
+        diffusion_model_cfg:
+          action_architecture: full
+          action_condition_on_text: false
+          action_hidden_size: 1024
+          action_ffn_dim: 4096
+          action_dim: 16
+          max_state_dim: 16
+          frame_seqlen: 80
+        train_architecture: full
+        video_condition_on_action_state: false
+        use_past_action_context: false
+        use_episode_first_frame_token: false
+    is_lora: False
+
+    # yaml_only：使用本配置的 RoboTwin absolute 设置，checkpoint 仅提供模型权重。
+    embodiment_tag: "robotwin"
+    metadata_embodiment_tag: "robotwin"
+    embodiment_tag_mapping:
+      robotwin: 33
+    relative_action: False
+    relative_action_mode: null
+    relative_action_keys: []
+    action_quaternion_mode: temporal_continuous
+    relative_action_per_horizon: False
+    load_to_device: False
+
+  optim:
+    lr: 4.0e-5
+    value_lr: 1.55e-4
+    adam_beta1: 0.95
+    adam_beta2: 0.999
+    adam_eps: 1.0e-08
+    weight_decay: 1.0e-5
+    clip_grad: 1.0
+    lr_scheduler: "cosine"
+    lr_warmup_steps: -1
+    lr_warmup_steps_ratio: 0.05
+    total_training_steps: ${runner.max_steps}
+
+  fsdp_config:
+    strategy: "fsdp2"
+    sharding_strategy: "full_shard"
+    use_orig_params: True
+    gradient_checkpointing: True
+    gradient_checkpointing_use_reentrant: True
+    limit_all_gathers: True
+    forward_prefetch: True
+    backward_prefetch: "pre"
+    reshard_after_forward: True
+    save_full_model_weights: False
+    grad_scaler:
+      enabled: False
+    mixed_precision:
+      param_dtype: bf16
+      reduce_dtype: fp32
+      buffer_dtype: bf16
+    amp_autocast:
+      enabled: False
+      precision: "bf16"

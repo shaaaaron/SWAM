@@ -1,0 +1,483 @@
+{
+  "noe_umi_16d": {
+    "statistics": {
+      "state": {
+        "eef_position": {
+          "min": [
+            -1.3723483085632324,
+            -1.277153730392456,
+            -6.890810966491699,
+            3.111238402198069e-05,
+            -0.9681925177574158,
+            -0.9452221393585205,
+            -0.9727450609207153,
+            0.0,
+            -2.153090476989746,
+            -2.9391980171203613,
+            -2.1084976196289062,
+            1.3283774933370296e-05,
+            -0.9778256416320801,
+            -0.9857291579246521,
+            -0.9351521730422974,
+            0.0
+          ],
+          "max": [
+            33.91883087158203,
+            33.152076721191406,
+            13.236030578613281,
+            1.0,
+            0.9876980781555176,
+            0.9188965559005737,
+            0.9777342081069946,
+            0.12179345637559891,
+            3.0974886417388916,
+            2.299511671066284,
+            2.6208906173706055,
+            1.0,
+            0.9507128000259399,
+            0.9692025780677795,
+            0.9700136780738831,
+            0.12179345637559891
+          ],
+          "mean": [
+            -0.006829417049843994,
+            0.0017442936341719114,
+            0.01212847897753706,
+            0.9595013911344221,
+            0.08805603428439047,
+            -0.012691320325375281,
+            -0.08739405749037216,
+            0.03541136046016593,
+            -0.026689829362565278,
+            -0.006637117567722401,
+            0.0036999486404418703,
+            0.9555488639627208,
+            -0.08616326687476822,
+            -0.027755497568532923,
+            0.06698786065395318,
+            0.03237716565651075
+          ],
+          "std": [
+            0.10122332709732466,
+            0.10475611776975252,
+            0.09007622154768806,
+            0.05259414057059355,
+            0.15282839815479138,
+            0.12595424619606513,
+            0.14770676795004248,
+            0.028292308862282935,
+            0.10197780520482799,
+            0.10591306834215808,
+            0.0962433047769092,
+            0.05291973212401573,
+            0.16059482562349867,
+            0.1377767286828873,
+            0.1633122648819548,
+            0.025268855142369852
+          ],
+          "q01": [
+            -0.2596135434508324,
+            -0.23195721402764322,
+            -0.21814006119966506,
+            0.7428805220127106,
+            -0.29474759846925735,
+            -0.3362599065899849,
+            -0.49124538570642473,
+            0.0,
+            -0.3143609449267387,
+            -0.30371992439031603,
+            -0.26457811176776885,
+            0.7414797908067703,
+            -0.4874173477292061,
+            -0.3797057548165321,
+            -0.33874423563480377,
+            0.0
+          ],
+          "q99": [
+            0.2573264864087094,
+            0.24383785247802692,
+            0.26544995993375775,
+            0.9996548944711685,
+            0.476253153979778,
+            0.31278575211763376,
+            0.2682502448558806,
+            0.1175715868175029,
+            0.2628876304626452,
+            0.2804719048738477,
+            0.27795445621013615,
+            0.9995472466945649,
+            0.30786080986261355,
+            0.3186849993467323,
+            0.48451579481363266,
+            0.11259837247431274
+          ]
+        }
+      },
+      "action": {
+        "eef_position": {
+          "min": [
+            -1.3723483085632324,
+            -1.277153730392456,
+            -6.890810966491699,
+            3.111238402198069e-05,
+            -0.9681925177574158,
+            -0.9452221393585205,
+            -0.9727450609207153,
+            0.0,
+            -2.153090476989746,
+            -2.9391980171203613,
+            -2.1084976196289062,
+            1.3283774933370296e-05,
+            -0.9778256416320801,
+            -0.9857291579246521,
+            -0.9351521730422974,
+            0.0
+          ],
+          "max": [
+            33.91883087158203,
+            33.152076721191406,
+            13.236030578613281,
+            1.0,
+            0.9876980781555176,
+            0.9188965559005737,
+            0.9777342081069946,
+            0.12179345637559891,
+            3.0974886417388916,
+            2.299511671066284,
+            2.6208906173706055,
+            1.0,
+            0.9507128000259399,
+            0.9692025780677795,
+            0.9700136780738831,
+            0.12179345637559891
+          ],
+          "mean": [
+            -0.006830897131812412,
+            0.0017424976019247045,
+            0.012128102692291766,
+            0.9594963885889489,
+            0.08806496427770598,
+            -0.012692902153335826,
+            -0.08740291782781298,
+            0.03541042392640262,
+            -0.026691916429686643,
+            -0.006638142167968151,
+            0.003698238228723856,
+            0.9555434205491192,
+            -0.0861693663177132,
+            -0.027758581438464797,
+            0.06699532096261478,
+            0.03237581060544829
+          ],
+          "std": [
+            0.1012360835252618,
+            0.1047725354378361,
+            0.09009028899601429,
+            0.05259436133326752,
+            0.1528351743424745,
+            0.12596354120870687,
+            0.14771354529786562,
+            0.028290442575003488,
+            0.10199035805776654,
+            0.10592675980660068,
+            0.09625530401688881,
+            0.05291948847134389,
+            0.16060357458038294,
+            0.13778613240685106,
+            0.1633208534127893,
+            0.02526676671587241
+          ],
+          "q01": [
+            -0.2620302110910416,
+            -0.23393302291631698,
+            -0.220286276191473,
+            0.7455609339475632,
+            -0.29698254227638243,
+            -0.3340765628218651,
+            -0.48798776030540464,
+            0.0,
+            -0.31369098752737046,
+            -0.3113885349035263,
+            -0.26715665102005004,
+            0.749629909992218,
+            -0.489816917181015,
+            -0.3762525063753128,
+            -0.3393796095252037,
+            0.0
+          ],
+          "q99": [
+            0.254855046272277,
+            0.2450944888591755,
+            0.26666935980319917,
+            0.9996733343601226,
+            0.4736539646983144,
+            0.315198745131492,
+            0.2675804835557929,
+            0.11807373739778992,
+            0.25871188282966606,
+            0.2839568889141081,
+            0.2778295031189906,
+            0.999582650065422,
+            0.3104965868592261,
+            0.3188834661245345,
+            0.4803828665614124,
+            0.11261034585535526
+          ]
+        }
+      }
+    },
+    "embodiment_tag": "noe_umi_16d",
+    "modalities": {
+      "video": {
+        "image": {
+          "resolution": [
+            320,
+            240
+          ],
+          "channels": 3,
+          "fps": 30.0
+        },
+        "wrist_image_1": {
+          "resolution": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "fps": 30.0
+        },
+        "wrist_image_2": {
+          "resolution": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "fps": 30.0
+        }
+      },
+      "state": {
+        "eef_position": {
+          "absolute": true,
+          "rotation_type": null,
+          "shape": [
+            16
+          ],
+          "continuous": true
+        }
+      },
+      "action": {
+        "eef_position": {
+          "absolute": true,
+          "rotation_type": null,
+          "shape": [
+            16
+          ],
+          "continuous": true
+        }
+      }
+    },
+    "action_quaternion_mode": "preserve",
+    "relative_action_mode": "noe_umi_eef_se3_episode_wxyz",
+    "relative_action_pose_reference": "per_arm",
+    "relative_action_reference": "episode_frame0",
+    "apply_noe_umi_frame_quality": true,
+    "relative_action_stats": {
+      "episode_stride": 10,
+      "max_episodes": null,
+      "streaming_stats": true,
+      "quantile_sample_limit": 100000,
+      "stats_seed": 42,
+      "statistics_unit": "source_frame",
+      "reference_quality_gate": true,
+      "state_rows": 148085855,
+      "action_rows": 148084811,
+      "sources": [
+        {
+          "root": "../data/noe_data_mini/1w_20260602to20260603_20260606",
+          "selected_episodes": 4457,
+          "total_episodes": 44569,
+          "selected_raw_frames": 19576559
+        },
+        {
+          "root": "../data/noe_data_mini/1w_20260510only_20260609",
+          "selected_episodes": 1546,
+          "total_episodes": 15453,
+          "selected_raw_frames": 6739522
+        },
+        {
+          "root": "../data/noe_data_mini/1w_20260429to20260503_20260608",
+          "selected_episodes": 2905,
+          "total_episodes": 29045,
+          "selected_raw_frames": 12335796
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260413only_20260611",
+          "selected_episodes": 10,
+          "total_episodes": 94,
+          "selected_raw_frames": 5528
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260415to20260416_20260611",
+          "selected_episodes": 31,
+          "total_episodes": 309,
+          "selected_raw_frames": 15668
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260418only_20260613",
+          "selected_episodes": 53,
+          "total_episodes": 521,
+          "selected_raw_frames": 129054
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260504to20260506_20260609",
+          "selected_episodes": 1808,
+          "total_episodes": 18080,
+          "selected_raw_frames": 7707520
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260507only_20260611",
+          "selected_episodes": 287,
+          "total_episodes": 2866,
+          "selected_raw_frames": 870862
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260508only_20260614",
+          "selected_episodes": 286,
+          "total_episodes": 2856,
+          "selected_raw_frames": 880427
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260509and20260609_20260612",
+          "selected_episodes": 1461,
+          "total_episodes": 14609,
+          "selected_raw_frames": 4143091
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260511to20260513_20260612",
+          "selected_episodes": 287,
+          "total_episodes": 2863,
+          "selected_raw_frames": 905439
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260516only_20260615",
+          "selected_episodes": 662,
+          "total_episodes": 6611,
+          "selected_raw_frames": 2101181
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260517only_20260611",
+          "selected_episodes": 410,
+          "total_episodes": 4094,
+          "selected_raw_frames": 1346035
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260518only_20260608",
+          "selected_episodes": 1321,
+          "total_episodes": 13206,
+          "selected_raw_frames": 6254821
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260519only_20260611",
+          "selected_episodes": 261,
+          "total_episodes": 2608,
+          "selected_raw_frames": 752534
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260520to20260522_20260615",
+          "selected_episodes": 928,
+          "total_episodes": 9280,
+          "selected_raw_frames": 2291811
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260523to20260524_20260615",
+          "selected_episodes": 482,
+          "total_episodes": 4818,
+          "selected_raw_frames": 1481333
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260525only_20260606",
+          "selected_episodes": 1038,
+          "total_episodes": 10377,
+          "selected_raw_frames": 4788980
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260526to20260527_20260605",
+          "selected_episodes": 1780,
+          "total_episodes": 17791,
+          "selected_raw_frames": 7925950
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260528to20260529_20260606",
+          "selected_episodes": 2157,
+          "total_episodes": 21570,
+          "selected_raw_frames": 9505617
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260530to20260531_20260607",
+          "selected_episodes": 3094,
+          "total_episodes": 30936,
+          "selected_raw_frames": 14169805
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260601only_20260607",
+          "selected_episodes": 1869,
+          "total_episodes": 18683,
+          "selected_raw_frames": 8461061
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260604only_20260605",
+          "selected_episodes": 1539,
+          "total_episodes": 15383,
+          "selected_raw_frames": 6359013
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260605only_20260606",
+          "selected_episodes": 1623,
+          "total_episodes": 16229,
+          "selected_raw_frames": 6201468
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260606only_20260607",
+          "selected_episodes": 1487,
+          "total_episodes": 14865,
+          "selected_raw_frames": 6128292
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260607only_20260608",
+          "selected_episodes": 2180,
+          "total_episodes": 21795,
+          "selected_raw_frames": 8956624
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260608only_20260609",
+          "selected_episodes": 2334,
+          "total_episodes": 23333,
+          "selected_raw_frames": 10039274
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260610only_20260613",
+          "selected_episodes": 1254,
+          "total_episodes": 12540,
+          "selected_raw_frames": 3764553
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260611only_20260614",
+          "selected_episodes": 1415,
+          "total_episodes": 14142,
+          "selected_raw_frames": 4354514
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260612only_20260615",
+          "selected_episodes": 1294,
+          "total_episodes": 12939,
+          "selected_raw_frames": 3980767
+        },
+        {
+          "root": "../data/noe_data_mini_other/1w_20260613only_20260616",
+          "selected_episodes": 929,
+          "total_episodes": 9289,
+          "selected_raw_frames": 2793223
+        }
+      ]
+    }
+  }
+}

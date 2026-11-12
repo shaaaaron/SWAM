@@ -1,0 +1,83 @@
+[build-system]
+# torch is intentionally NOT listed here: pinning it would force PEP 517 build
+# isolation to download a multi-GB generic torch into a throwaway env and link
+# the CUDA extension against it (ABI-mismatch risk). To compile the optional
+# fast-clip kernel, install with `--no-build-isolation` in an env that already
+# has torch; otherwise setup.py skips the extension and the pure-Python clip is
+# used. See docs/getting-started/installation.md.
+requires = ["setuptools>=77.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dmuon"
+version = "0.2.0+gradlifetime.1"
+description = "Dedicated parameter ownership for distributed training with matrix optimizers"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.6.0",
+]
+
+[project.optional-dependencies]
+syrk = [
+    "nvidia-cutlass-dsl>=4.4.2",
+    "apache-tvm-ffi>=0.1.6,<0.2",
+    "torch-c-dlpack-ext",
+]
+# quack-kernels ships its own pinned cutlass-dsl / tvm-ffi / torch-c-dlpack-ext,
+# so this extras deliberately does NOT re-list them.  SM90+ users pick up the
+# full Tri Dao SYRK stack via `pip install dmuon[quack]`.
+quack = [
+    "quack-kernels>=0.3,<0.4",
+]
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+    "mkdocs-static-i18n>=1.3",
+    "mkdocstrings[python]>=0.25",
+    "pymdown-extensions>=10.0",
+]
+release = [
+    "build>=1.2",
+    "twine>=5",
+]
+dev = [
+    "pytest>=8",
+    "ruff>=0.8",
+    "build>=1.2",
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+    "mkdocs-static-i18n>=1.3",
+    "mkdocstrings[python]>=0.25",
+    "pymdown-extensions>=10.0",
+]
+
+[tool.setuptools.packages.find]
+# Flat repo layout: the Python package is just ``dmuon/`` at the repo root.
+# Setuptools ≥ 70 refuses to auto-discover when peers like ``benchmarks/`` or
+# ``tests/`` look like additional top-level packages, so we pin the include
+# list explicitly here.
+include = ["dmuon*"]
+exclude = [
+    "benchmarks*",
+    "tests*",
+    "docs*",
+    "examples*",
+    "assets*",
+    "site*",
+]
+
+[tool.setuptools.package-data]
+dmuon = ["csrc/*.cu"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E402", "E501", "E731", "E741", "F841", "I001"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

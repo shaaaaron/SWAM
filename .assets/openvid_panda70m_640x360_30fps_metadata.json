@@ -1,0 +1,20 @@
+{
+  "openvid": {
+    "statistics": {
+      "state": {},
+      "action": {}
+    },
+    "modalities": {
+      "video": {
+        "cam_high": {
+          "resolution": [640, 360],
+          "channels": 3,
+          "fps": 30.0
+        }
+      },
+      "state": {},
+      "action": {}
+    },
+    "embodiment_tag": "openvid"
+  }
+}

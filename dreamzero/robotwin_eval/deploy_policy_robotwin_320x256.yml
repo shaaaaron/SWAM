@@ -1,0 +1,29 @@
+policy_name: dreamzero2robotwin_interface
+task_name: null
+task_config: null
+ckpt_setting: null
+seed: null
+instruction_type: unseen
+
+# DreamZero Client Parameters (RoboTwin v1 - EEF / 16D)
+host: "127.0.0.1"
+port: 8000
+# RoboTwin v1 EEF action: 16D = [L_xyz(3)+L_quat(4)+L_grip(1)+R_xyz(3)+R_quat(4)+R_grip(1)].
+action_dim: 16
+action_chunk_size: 48
+# These checkpoints expect client frames resized to 320x256 before VideoToTensor.
+image_height: 256
+image_width: 320
+
+# Action type for RoboTwin: "qpos" (joint position) or "ee" (end-effector pose).
+# "ee" mode: model outputs 16D [L_ee(7=xyz+quat)+L_grip(1)+R_ee(7=xyz+quat)+R_grip(1)],
+#   matching RoboTwin's take_action(action, action_type='ee') format directly.
+action_type: "ee"
+
+# Server-side parameters (loaded by dreamzero_robotwin_server.py via --config)
+# Input state dimensions expected by the checkpoint's normalizer.
+# RoboTwin v1: joint=16 (EEF pose + grippers), gripper=0.
+state_joint_dim: 16
+state_gripper_dim: 0
+# Embodiment tag for loading transforms/metadata (must match training metadata.json key).
+embodiment_tag: "robotwin"

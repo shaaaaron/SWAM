@@ -1,0 +1,13 @@
+{
+  "ego4d": {
+    "statistics": {"state": {}, "action": {}},
+    "modalities": {
+      "video": {
+        "cam_high": {"resolution": [832, 448], "channels": 3, "fps": 30.0}
+      },
+      "state": {},
+      "action": {}
+    },
+    "embodiment_tag": "ego4d"
+  }
+}
