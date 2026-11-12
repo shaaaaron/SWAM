@@ -66,9 +66,9 @@ Use uv to create the training environment and pip to install the dependencies. D
 
 ## Pretraining data
 
-The public data follows a LeRobot directory layout, with videos standardized to 320×256 AV1. Source-specific episode records and annotations are preserved, and manipulation data includes additional detailed annotations. Uploads and verification are complete, with 27 subsets, 3,839 TAR archives, and approximately 3.98 TB of data. Download instructions and release scope are available on the dataset page. [SWAM-Pretrain](https://huggingface.co/datasets/FreDERicia/SWAM-Pretrain)
+SWAM-Pretrain provides 27 subsets in a LeRobot-style layout, with 320×256 AV1 videos, source annotations, and additional manipulation annotations. All 3,839 TAR archives (approximately 3.98 TB) have been uploaded and verified. See the [dataset page](https://huggingface.co/datasets/FreDERicia/SWAM-Pretrain) for release scope and download instructions.
 
-The paper uses a full pretraining pool of approximately 47,000 hours. Ego4D and EgoSuite are excluded from this release due to upstream licensing and redistribution restrictions. UMI data awaits a future release by Noematrix. Each source's license, attribution requirements, and usage restrictions continue to apply.
+The paper uses approximately 47,000 hours of pretraining data. Ego4D and EgoSuite are excluded due to licensing restrictions, and UMI awaits release by Noematrix. Each source’s license, attribution, and usage requirements apply.
 
 ## Citation
 
