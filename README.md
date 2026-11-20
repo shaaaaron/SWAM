@@ -6,6 +6,7 @@
   <a href="https://char-lotte-xia.github.io/swam-official/"><img src="media/readme/link-website.png" alt="Project website" width="108" height="35"></a>
   <a href="https://arxiv.org/abs/2611.12870"><img src="media/readme/link-arxiv.png" alt="arXiv paper" width="108" height="35"></a>
   <a href="https://huggingface.co/datasets/FreDERicia/SWAM-Pretrain"><img src="media/readme/link-dataset.png" alt="Pretraining dataset" width="108" height="35"></a>
+  <a href="https://huggingface.co/FreDERicia/SWAM">Models</a>
 </p>
 
 SWAM studies how to preserve language–video alignment acquired during video pretraining while learning actions. It combines **General, Ego, UMI, and Robotics** experience to transfer these capabilities to robot control.
@@ -63,6 +64,10 @@ Use uv to create the training environment and pip to install the dependencies. D
 | `examples/sft/` | Training scripts and experiment configurations |
 | `.assets/` | Dataset metadata and normalization statistics |
 | `docs/` | Installation, training, and evaluation guides, plus upstream RLinf documentation |
+
+## Models
+
+The [SWAM model repository](https://huggingface.co/FreDERicia/SWAM) provides the pretrained checkpoint and the RoboTwin posttrained checkpoint. The two checkpoints are stored separately in the `pretrain/` and `posttrain/` directories. We also provide the RoboTwin posttraining dataset used for the posttrained checkpoint on the [SWAM-Posttrain dataset page](https://huggingface.co/datasets/FreDERicia/SWAM-Posttrain).
 
 ## Pretraining data
 

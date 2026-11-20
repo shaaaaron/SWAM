@@ -16,12 +16,30 @@ export DREAMZERO_WAN22_PATH="$PWD/models/Wan2.2-TI2V-5B"
 
 The training launchers determine the repository root automatically and default to `dreamzero/`, `.venv/main`, and `logs/`. Override these paths with `RLINF_ROOT`, `DREAMZERO_PATH`, `VENV_PATH`, and `LOG_ROOT`. The examples use the default GPU list and sharding strategy. Configure machine-specific settings, such as the network interface, for your environment.
 
-## 2. Post-training
+## 2. Pretraining
 
-Initialize RoboTwin Clean post-training from converted pretraining weights. Replace the weights path with your actual directory.
+Run robotics pretraining with [pretrain.yaml](../examples/sft/config/pretrain.yaml). Replace the dataset and model paths with your local paths.
 
 ```bash
 unset WARM_START_MODEL_PATH RESUME_DIR
+
+export PET_NNODES=4
+export CONFIG_NAME="pretrain"
+export EXPERIMENT_NAME=pretrain_example
+export MAX_STEPS=20000
+export MICRO_BATCH_SIZE=8
+export GLOBAL_BATCH_SIZE=256
+export AUTO_CONVERT_FINAL_CKPT=false
+
+bash examples/sft/train_dreamzero.sh
+```
+
+## 3. Post-training
+
+Initialize RoboTwin Clean post-training from converted pretraining weights with [posttrain.yaml](../examples/sft/config/posttrain.yaml). Replace the weights path with your actual directory.
+
+```bash
+unset RESUME_DIR
 
 export PET_NNODES=4
 export CONFIG_NAME="posttrain"
@@ -37,7 +55,9 @@ bash examples/sft/train_dreamzero.sh
 
 Training logs and checkpoints are written to `logs/posttrain_example/` by default. After training, the script automatically produces evaluation weights under `logs-eval/posttrain_example/global_step_20000/`.
 
-## 3. Pretraining → Post-training
+## 4. Pretraining → Post-training
+
+We also provide DMuon pretraining and post-training recipes in [pretrain_dmuon.yaml](../examples/sft/config/pretrain_dmuon.yaml) and [posttrain_dmuon.yaml](../examples/sft/config/posttrain_dmuon.yaml). To use them with the pipeline below, set `PRETRAIN_CONFIG_NAME=pretrain_dmuon` and `POSTTRAIN_CONFIG_NAME=posttrain_dmuon`.
 
 Run Robotics pretraining, weight conversion, and RoboTwin post-training in one pipeline. Extract the selected SWAM-Pretrain subsets into `../data/robotics/`, following the directory layout on the dataset page. Pretraining starts from the base weights prepared above. Set the experiment name, step count, and batch sizes for each stage.
 
