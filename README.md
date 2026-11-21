@@ -6,7 +6,7 @@
   <a href="https://char-lotte-xia.github.io/swam-official/"><img src="media/readme/link-website.png" alt="Project website" width="108" height="35"></a>
   <a href="https://arxiv.org/abs/2611.12870"><img src="media/readme/link-arxiv.png" alt="arXiv paper" width="108" height="35"></a>
   <a href="https://huggingface.co/datasets/FreDERicia/SWAM-Pretrain"><img src="media/readme/link-dataset.png" alt="Pretraining dataset" width="108" height="35"></a>
-  <a href="https://huggingface.co/FreDERicia/SWAM">Models</a>
+  <a href="https://huggingface.co/FreDERicia/SWAM"><img src="media/readme/link-models.png" alt="Models" width="108" height="35"></a>
 </p>
 
 SWAM studies how to preserve language–video alignment acquired during video pretraining while learning actions. It combines **General, Ego, UMI, and Robotics** experience to transfer these capabilities to robot control.
