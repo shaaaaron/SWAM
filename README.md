@@ -1,6 +1,6 @@
 # SWAM
 
-[![SWAM project cover](media/readme/swam-cover-white.png)](https://char-lotte-xia.github.io/swam-official/)
+[![SWAM project cover](media/readme/swam-cover-white-original-layout.png)](https://char-lotte-xia.github.io/swam-official/)
 
 <p align="center">
   <a href="https://char-lotte-xia.github.io/swam-official/"><img src="https://img.shields.io/badge/Project-Page-0A7F5F.svg" alt="Project website"></a>
