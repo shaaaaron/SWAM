@@ -3,10 +3,10 @@
 [![SWAM project cover](media/readme/swam-cover.png)](https://char-lotte-xia.github.io/swam-official/)
 
 <p align="center">
-  <a href="https://char-lotte-xia.github.io/swam-official/"><img src="media/readme/link-website.png" alt="Project website" width="108" height="35"></a>
-  <a href="https://arxiv.org/abs/2611.12870"><img src="media/readme/link-arxiv.png" alt="arXiv paper" width="108" height="35"></a>
-  <a href="https://huggingface.co/datasets/FreDERicia/SWAM-Pretrain"><img src="media/readme/link-dataset.png" alt="Pretraining dataset" width="108" height="35"></a>
-  <a href="https://huggingface.co/FreDERicia/SWAM"><img src="media/readme/link-models-v3.png" alt="Models" width="108" height="35"></a>
+  <a href="https://char-lotte-xia.github.io/swam-official/"><img src="https://img.shields.io/badge/Project-Page-0A7F5F.svg" alt="Project website"></a>
+  <a href="https://arxiv.org/abs/2611.12870"><img src="https://img.shields.io/badge/arXiv-Paper-b31b1b.svg" alt="arXiv paper"></a>
+  <a href="https://huggingface.co/datasets/FreDERicia/SWAM-Pretrain"><img src="https://img.shields.io/badge/%F0%9F%A4%97-Data-yellow.svg" alt="Pretraining dataset"></a>
+  <a href="https://huggingface.co/FreDERicia/SWAM"><img src="https://img.shields.io/badge/%F0%9F%A4%97-Models-yellow.svg" alt="Models"></a>
 </p>
 
 SWAM studies how to preserve language–video alignment acquired during video pretraining while learning actions. It combines **General, Ego, UMI, and Robotics** experience to transfer these capabilities to robot control.
